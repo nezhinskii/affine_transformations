@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 sealed class Primitive{
+  bool isSelected = false;
 }
 
 class Point extends Primitive{

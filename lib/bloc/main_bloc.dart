@@ -7,13 +7,13 @@ part 'main_event.dart';
 part 'main_state.dart';
 
 class MainBloc extends Bloc<MainEvent, MainState> {
-  MainBloc() : super(CommonState(primitives: [], selectedPrimitivesIndexes: {})) {
+  MainBloc() : super(CommonState(primitives: [])) {
     on<StartPrimitiveAdding>(_onStartPrimitiveAdding);
     on<AddPointEvent>(_onAddPointEvent);
     on<EndPrimitiveAdding>(_onEndPrimitiveAdding);
     on<ClearCanvasEvent>(_onClearCanvas);
-    on<SelectPrimitive>(_onSelectPrimitive);
-    on<UnselectPrimitive>(_onUnselectPrimitive);
+    on<PrimitiveSelectedChanged>(_onPrimitiveSelectedChanged);
+    on<RemovePrimitive>(_onPrimitiveRemoving);
   }
 
   void _onStartPrimitiveAdding(StartPrimitiveAdding event, Emitter emit) {
@@ -22,7 +22,6 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     } else {
       emit(PrimitiveAddingState(
         primitives: state.primitives,
-        selectedPrimitivesIndexes: state.selectedPrimitivesIndexes,
         newPoints: []
       ));
     }
@@ -50,7 +49,6 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       }
       emit(CommonState(
         primitives: state.primitives,
-        selectedPrimitivesIndexes: state.selectedPrimitivesIndexes
       ));
     } else {
       return;
@@ -61,23 +59,21 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     if (state is PrimitiveAddingState){
       emit(PrimitiveAddingState(
         primitives: [],
-        selectedPrimitivesIndexes: {},
         newPoints: [])
       );
     } else {
-      emit(state.copyWith(selectedPrimitivesIndexes: {}, primitives: []));
+      emit(state.copyWith(primitives: []));
     }
   }
 
-  void _onSelectPrimitive(SelectPrimitive event, Emitter emit){
-    emit(state.copyWith(
-      selectedPrimitivesIndexes: state.selectedPrimitivesIndexes..add(event.index)
-    ));
+  void _onPrimitiveSelectedChanged(PrimitiveSelectedChanged event, Emitter emit){
+    state.primitives[event.index].isSelected = !state.primitives[event.index].isSelected;
+    emit(state.copyWith());
   }
 
-  void _onUnselectPrimitive(UnselectPrimitive event, Emitter emit){
+  void _onPrimitiveRemoving(RemovePrimitive event, Emitter emit){
     emit(state.copyWith(
-      selectedPrimitivesIndexes: state.selectedPrimitivesIndexes..remove(event.index)
+      primitives: state.primitives..removeAt(event.index)
     ));
   }
 }

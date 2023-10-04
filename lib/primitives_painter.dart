@@ -7,23 +7,20 @@ class PrimitivesPainter extends CustomPainter{
   final List<Primitive> primitives;
   final Paint style;
   final List<Offset>? newPoints;
-  final Set<int> selectedPrimitivesIndexes;
 
   const PrimitivesPainter({
     required this.primitives,
     required this.style,
-    required this.selectedPrimitivesIndexes,
     this.newPoints
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (int i = 0; i < primitives.length; ++i){
+    for (var primitive in primitives){
       var paint = Paint()..strokeWidth = style.strokeWidth..color = style.color;
-      if (selectedPrimitivesIndexes.contains(i)){
+      if (primitive.isSelected){
         paint.color = Colors.red;
       }
-      final primitive = primitives[i];
       switch (primitive){
         case Point():
           canvas.drawPoints(PointMode.points, [primitive.position], paint);

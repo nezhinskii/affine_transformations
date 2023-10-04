@@ -57,12 +57,11 @@ class HomePage extends StatelessWidget {
                     child: CustomPaint(
                       foregroundPainter: PrimitivesPainter(
                         primitives: state.primitives,
-                        selectedPrimitivesIndexes: state.selectedPrimitivesIndexes,
                         newPoints: switch(state){
                           CommonState() => null,
                           PrimitiveAddingState() => state.newPoints,
                         },
-                        style: Paint()..color = Colors.black..strokeWidth = 2
+                        style: Paint()..color = Colors.black..strokeWidth = 3
                       ),
                       child: Container(
                         color: Colors.white,

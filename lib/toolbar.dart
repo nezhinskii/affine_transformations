@@ -49,7 +49,7 @@ class ToolBar extends StatelessWidget {
             ),
           )),
       height: double.infinity,
-      width: 220,
+      width: 270,
       child: Column(
         children: [
           const SizedBox(height: 20,),
@@ -78,8 +78,7 @@ class ToolBar extends StatelessWidget {
             constraints: const BoxConstraints(
               maxHeight: 300,
             ),
-            width: 200,
-            padding: const EdgeInsets.symmetric(vertical: 10),
+            width: 240,
             decoration: BoxDecoration(
               border: Border.all(
                 color: Theme.of(context).colorScheme.primary,
@@ -88,19 +87,28 @@ class ToolBar extends StatelessWidget {
             ),
             child: BlocBuilder<MainBloc, MainState>(
               builder: (context, state) => switch (state.primitives.isEmpty){
-                true => const Text("Пусто", textAlign: TextAlign.center,),
+                true => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 15),
+                  child: Text("Пусто", textAlign: TextAlign.center,),
+                ),
                 false => ListView.builder(
                   shrinkWrap: true,
-                  itemBuilder: (context, index) => _PrimitiveTile(
-                    title: _calcPrimitiveTitle(state.primitives, index),
-                    isSelected: state.selectedPrimitivesIndexes.contains(index),
-                    onTap: state.selectedPrimitivesIndexes.contains(index) ? () {
-                      context.read<MainBloc>().add(UnselectPrimitive(index));
-                    } : () {
-                      context.read<MainBloc>().add(SelectPrimitive(index));
+                  itemBuilder: (context, index) {
+                    if (index == 0 || index == state.primitives.length + 1){
+                      return const SizedBox(height: 10,);
                     }
-                  ),
-                  itemCount: state.primitives.length,
+                    return _PrimitiveTile(
+                      title: _calcPrimitiveTitle(state.primitives, index - 1),
+                      isSelected: state.primitives[index - 1].isSelected,
+                      onTap: () {
+                        context.read<MainBloc>().add(PrimitiveSelectedChanged(index - 1));
+                      },
+                      onRemove: () {
+                        context.read<MainBloc>().add(RemovePrimitive(index - 1));
+                      },
+                    );
+                  },
+                  itemCount: state.primitives.length + 2,
                 ),
               },
             ),
@@ -124,11 +132,13 @@ class _PrimitiveTile extends StatelessWidget {
     Key? key,
     required this.title,
     required this.isSelected,
-    required this.onTap
+    required this.onTap,
+    required this.onRemove
   }) : super(key: key);
   final String title;
   final bool isSelected;
   final Function() onTap;
+  final Function() onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +153,12 @@ class _PrimitiveTile extends StatelessWidget {
               value: isSelected,
               onChanged: null,
             ),
-            Text(title)
+            Text(title),
+            const Spacer(),
+            IconButton(
+              onPressed: onRemove,
+              icon: const Icon(Icons.delete_outline)
+            )
           ],
         ),
       ),

@@ -21,12 +21,12 @@ class ClearCanvasEvent extends MainEvent{
   const ClearCanvasEvent();
 }
 
-class SelectPrimitive extends MainEvent{
+class PrimitiveSelectedChanged extends MainEvent{
   final int index;
-  const SelectPrimitive(this.index);
+  const PrimitiveSelectedChanged(this.index);
 }
 
-class UnselectPrimitive extends MainEvent{
+class RemovePrimitive extends MainEvent{
   final int index;
-  const UnselectPrimitive(this.index);
+  const RemovePrimitive(this.index);
 }
