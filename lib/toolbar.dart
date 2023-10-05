@@ -113,6 +113,20 @@ class ToolBar extends StatelessWidget {
               },
             ),
           ),
+          const SizedBox(height: 20,),
+          ElevatedButton(
+            onPressed: () {
+              context.read<MainBloc>().add(LinesIntersectionEvent());
+            },
+            child: const Text("Точка пересечения ребер", textAlign: TextAlign.center,)
+          ),
+          const SizedBox(height: 20,),
+          ElevatedButton(
+              onPressed: () {
+                context.read<MainBloc>().add(PointRelativeToLineEvent());
+              },
+              child: const Text("Расположение точки относительно отрезка", textAlign: TextAlign.center,)
+          ),
           const Spacer(),
           ElevatedButton(
             onPressed: () {

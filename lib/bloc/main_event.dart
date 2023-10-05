@@ -30,3 +30,9 @@ class RemovePrimitive extends MainEvent{
   final int index;
   const RemovePrimitive(this.index);
 }
+
+class LinesIntersectionEvent extends MainEvent{
+}
+
+class PointRelativeToLineEvent extends MainEvent{
+}

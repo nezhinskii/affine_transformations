@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:affine_transformations/line_algorithms/lines_intersection.dart';
+import 'package:affine_transformations/line_algorithms/point_relative_to_line.dart';
 import 'package:affine_transformations/primitives.dart';
 import 'package:bloc/bloc.dart';
 
@@ -14,6 +16,8 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     on<ClearCanvasEvent>(_onClearCanvas);
     on<PrimitiveSelectedChanged>(_onPrimitiveSelectedChanged);
     on<RemovePrimitive>(_onPrimitiveRemoving);
+    on<LinesIntersectionEvent>(_linesIntersection);
+    on<PointRelativeToLineEvent>(_pointRelativeToLine);
   }
 
   void _onStartPrimitiveAdding(StartPrimitiveAdding event, Emitter emit) {
@@ -74,6 +78,90 @@ class MainBloc extends Bloc<MainEvent, MainState> {
   void _onPrimitiveRemoving(RemovePrimitive event, Emitter emit){
     emit(state.copyWith(
       primitives: state.primitives..removeAt(event.index)
+    ));
+  }
+
+  void _linesIntersection(LinesIntersectionEvent event, Emitter emit){
+    final selectedPrimitives = <Line>[];
+    for (var primitive in state.primitives){
+      if (primitive.isSelected){
+        if (primitive is Line){
+          selectedPrimitives.add(primitive);
+        } else {
+          emit(state.copyWith(
+            message: "Выбранные примитивы должны быть отрезками"
+          ));
+          return;
+        }
+      }
+    }
+    if (selectedPrimitives.length != 2){
+      emit(state.copyWith(
+          message: "Должны быть выбраны ровно 2 отрезка"
+      ));
+      return;
+    }
+    final intersectionPoint = linesIntersection(selectedPrimitives[0], selectedPrimitives[1]);
+    if (intersectionPoint == null){
+      emit(state.copyWith(
+          message: "Отрезки не пересекаются"
+      ));
+      return;
+    }
+    emit(state.copyWith(
+      primitives: state.primitives..add(Point(intersectionPoint)),
+      message: "Точка пересечения найдена, добавлена как примитив"
+    ));
+  }
+
+  void _pointRelativeToLine(PointRelativeToLineEvent event, Emitter emit){
+    Point? selectedPoint;
+    Line? selectedLine;
+    bool isLineSelected = false, isPointSelected = false;
+    const errorMessage = "Должна быть выбрана 1 точка и 1 отрезок";
+    for(var primitive in state.primitives){
+      if (primitive.isSelected){
+        if (primitive is! Line && primitive is! Point){
+          emit(state.copyWith(
+              message: errorMessage
+          ));
+          return;
+        }
+        if (primitive is Line){
+          if (isLineSelected){
+            emit(state.copyWith(
+                message: errorMessage
+            ));
+            return;
+          }
+          isLineSelected = true;
+          selectedLine = primitive;
+        }
+        if (primitive is Point){
+          if (isPointSelected){
+            emit(state.copyWith(
+                message: errorMessage
+            ));
+            return;
+          }
+          isPointSelected = true;
+          selectedPoint = primitive;
+        }
+      }
+    }
+    if (!isLineSelected || !isPointSelected){
+      emit(state.copyWith(
+          message: errorMessage
+      ));
+      return;
+    }
+    final res = pointRelativeToLine(selectedPoint!, selectedLine!);
+    final message = '''Точка находится ${switch (res) {
+      RelativePointPosition.left => 'слева',
+      RelativePointPosition.right => 'справа',
+    }} от отрезка''';
+    emit(state.copyWith(
+        message: message
     ));
   }
 }

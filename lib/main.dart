@@ -35,44 +35,61 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: (event) {
-        if (event.buttons == 2) {
-          context.read<MainBloc>().add(const EndPrimitiveAdding());
-        }
-      },
-      child: Row(
-        children: [
-          const ToolBar(),
-          Expanded(
-            child: BlocBuilder<MainBloc, MainState>(
-              builder: (context, state) {
-                return GestureDetector(
-                  onPanDown: (details) {
-                    if (state is PrimitiveAddingState){
-                      context.read<MainBloc>().add(AddPointEvent(details.localPosition));
-                    }
-                  },
-                  child: ClipRRect(
-                    child: CustomPaint(
-                      foregroundPainter: PrimitivesPainter(
-                        primitives: state.primitives,
-                        newPoints: switch(state){
-                          CommonState() => null,
-                          PrimitiveAddingState() => state.newPoints,
-                        },
-                        style: Paint()..color = Colors.black..strokeWidth = 3
-                      ),
-                      child: Container(
-                        color: Colors.white,
+    return Scaffold(
+      body: Listener(
+        onPointerDown: (event) {
+          if (event.buttons == 2) {
+            context.read<MainBloc>().add(const EndPrimitiveAdding());
+          }
+        },
+        child: Row(
+          children: [
+            const ToolBar(),
+            Expanded(
+              child: BlocConsumer<MainBloc, MainState>(
+                listener: (context, state) {
+                  if (state.message != null){
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        width: 700,
+                        content: Text(
+                          state.message!,
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    );
+                  }
+                },
+                builder: (context, state) {
+                  return GestureDetector(
+                    onPanDown: (details) {
+                      if (state is PrimitiveAddingState){
+                        context.read<MainBloc>().add(AddPointEvent(details.localPosition));
+                      }
+                    },
+                    child: ClipRRect(
+                      child: CustomPaint(
+                        foregroundPainter: PrimitivesPainter(
+                          primitives: state.primitives,
+                          newPoints: switch(state){
+                            CommonState() => null,
+                            PrimitiveAddingState() => state.newPoints,
+                          },
+                          style: Paint()..color = Colors.black..strokeWidth = 3
+                        ),
+                        child: Container(
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-          )
-        ],
+                  );
+                },
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
