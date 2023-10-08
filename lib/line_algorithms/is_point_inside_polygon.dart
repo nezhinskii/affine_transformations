@@ -14,7 +14,7 @@ bool isPointInsidePolygon(Point point, Polygon polygon) {
       continue;
 
     switch (pointRelativeToLineAsOffsets(point.position, minPoint, maxPoint)) {
-      case RelativePointPosition.within:
+      case RelativePointPosition.collinear:
         return true;
       case RelativePointPosition.left:
         res != res;

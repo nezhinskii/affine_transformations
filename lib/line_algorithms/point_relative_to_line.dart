@@ -5,7 +5,7 @@ import 'package:affine_transformations/primitives.dart';
 enum RelativePointPosition {
   left,
   right,
-  within,
+  collinear,
 }
 
 RelativePointPosition pointRelativeToLine(Point point, Line line) {
@@ -14,7 +14,7 @@ RelativePointPosition pointRelativeToLine(Point point, Line line) {
   final sa = a.dx * b.dy - b.dx * a.dy;
 
   return sa == 0
-      ? RelativePointPosition.within
+      ? RelativePointPosition.collinear
       : sa > 0
           ? RelativePointPosition.left
           : RelativePointPosition.right;
@@ -27,7 +27,7 @@ RelativePointPosition pointRelativeToLineAsOffsets(
   final sa = a.dx * b.dy - b.dx * a.dy;
 
   return sa == 0
-      ? RelativePointPosition.within
+      ? RelativePointPosition.collinear
       : sa > 0
           ? RelativePointPosition.left
           : RelativePointPosition.right;
