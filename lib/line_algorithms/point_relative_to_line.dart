@@ -9,12 +9,8 @@ enum RelativePointPosition {
 }
 
 RelativePointPosition pointRelativeToLine(Point point, Line line) {
-  var start = line.startPosition;
-  var end = line.endPosition;
-  if (start.dy < end.dy) (start, end) = (end, start);
-
-  final b = end - start;
-  final a = point.position - start;
+  final b = line.endPosition - line.startPosition;
+  final a = point.position - line.startPosition;
   final sa = a.dx * b.dy - b.dx * a.dy;
 
   return sa == 0
