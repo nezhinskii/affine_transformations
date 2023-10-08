@@ -17,7 +17,7 @@ bool isPointInsidePolygon(Point point, Polygon polygon) {
       case RelativePointPosition.collinear:
         return true;
       case RelativePointPosition.left:
-        res != res;
+        res = !res;
         break;
       default:
     }
