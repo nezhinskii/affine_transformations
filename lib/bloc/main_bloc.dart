@@ -1,12 +1,15 @@
 import 'dart:ui';
+import 'package:vector_math/vector_math.dart';
 
 import 'package:affine_transformations/line_algorithms/lines_intersection.dart';
 import 'package:affine_transformations/line_algorithms/point_relative_to_line.dart';
 import 'package:affine_transformations/line_algorithms/is_point_inside_polygon.dart';
+import 'package:affine_transformations/matrix/matrix.dart';
 import 'package:affine_transformations/primitives.dart';
 import 'package:bloc/bloc.dart';
 
 part 'main_event.dart';
+
 part 'main_state.dart';
 
 class MainBloc extends Bloc<MainEvent, MainState> {
@@ -20,6 +23,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     on<LinesIntersectionEvent>(_linesIntersection);
     on<PointRelativeToLineEvent>(_pointRelativeToLine);
     on<IsPointInsidePolygonEvent>(_isPointInsidePolygon);
+    on<AffineTransformationEvent>(_onAffineTransformation);
   }
 
   void _onStartPrimitiveAdding(StartPrimitiveAdding event, Emitter emit) {
@@ -186,4 +190,126 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     final message = '''Точка ${res ? 'внутри' : 'снаружи'} многоугольника''';
     emit(state.copyWith(message: message));
   }
+
+  void _onAffineTransformation(AffineTransformationEvent event, Emitter emit) {
+    double? dx;
+    if (event.dx != null) {
+      dx = double.tryParse(event.dx!);
+      if (dx == null) {
+        emit(state.copyWith(message: "Не число в dx"));
+        return;
+      }
+    }
+
+    double? dy;
+    if (event.dy != null) {
+      dy = double.tryParse(event.dy!);
+      if (dy == null) {
+        emit(state.copyWith(message: "Не число в dy"));
+        return;
+      }
+      else {
+        dy = -dy;
+      }
+    }
+
+    double? angle;
+    if (event.angle != null) {
+      angle = double.tryParse(event.angle!);
+      if (angle == null) {
+        emit(state.copyWith(message: "Не число в angle"));
+        return;
+      }
+    }
+
+
+    Offset? move =
+        dx != null || dy != null ? Offset(dx ?? 0.0, dy ?? 0.0) : null;
+    if (angle != null) {
+      angle = radians(angle);
+    }
+
+    Iterable<Primitive> selected =
+        state.primitives.where((primitive) => primitive.isSelected);
+
+    Point? center;
+    for (var p in selected) {
+      if (p is Point) {
+        if (center != null) {
+          emit(state.copyWith(message: "Не выбирайте более одной точки"));
+          return;
+        }
+        center = p;
+      }
+    }
+
+    if (center == null) {
+      double xCenter = 0;
+      double yCenter = 0;
+      int count = 0;
+
+      for (var primitive in selected) {
+        count += primitive.vertices.length;
+
+        for (var point in primitive.vertices) {
+          xCenter += point.dx;
+          yCenter += point.dy;
+        }
+      }
+      xCenter /= count;
+      yCenter /= count;
+
+      center = Point(Offset(xCenter, yCenter));
+    }
+
+    if (move != null) {
+      for (var primitive in selected) {
+        final vertices = <Offset>[];
+        for (var point in primitive.vertices) {
+          vertices.add(
+            _movePoint(
+              point,
+              move.dx,
+              move.dy,
+            ),
+          );
+        }
+        primitive.vertices = vertices;
+      }
+    }
+
+    if (angle != null) {
+      for (var primitive in selected) {
+        final vertices = <Offset>[];
+        for (var point in primitive.vertices) {
+          vertices.add(
+            _rotatePoint(
+              point,
+              angle,
+              center.position.dx,
+              center.position.dy,
+            ),
+          );
+        }
+        primitive.vertices = vertices;
+      }
+    }
+
+    emit(state.copyWith());
+  }
+}
+
+Offset _rotatePoint(
+    Offset point, double angle, double xCenter, double yCenter) {
+  Matrix mPoint = Matrix.point(point.dx, point.dy);
+  Matrix transform = Matrix.rotation(angle, xCenter, yCenter);
+  Matrix result = mPoint * transform;
+  return Offset(result[0][0], result[0][1]);
+}
+
+Offset _movePoint(Offset point, double dx, double dy) {
+  Matrix mPoint = Matrix.point(point.dx, point.dy);
+  Matrix transform = Matrix.translation(dx, dy);
+  Matrix result = mPoint * transform;
+  return Offset(result[0][0], result[0][1]);
 }

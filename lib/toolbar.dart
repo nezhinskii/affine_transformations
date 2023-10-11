@@ -1,10 +1,20 @@
+import 'package:affine_transformations/affine_fields.dart';
 import 'package:affine_transformations/bloc/main_bloc.dart';
 import 'package:affine_transformations/primitives.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ToolBar extends StatelessWidget {
+class ToolBar extends StatefulWidget {
   const ToolBar({Key? key}) : super(key: key);
+
+  @override
+  State<ToolBar> createState() => _ToolBarState();
+}
+
+class _ToolBarState extends State<ToolBar> {
+  String x = "";
+  String y = "";
+  String angle = "";
 
   String _calcPrimitiveTitle(List<Primitive> primitives, int index) {
     final String title;
@@ -150,13 +160,32 @@ class ToolBar extends StatelessWidget {
             height: 20,
           ),
           ElevatedButton(
-              onPressed: () {
-                context.read<MainBloc>().add(IsPointInsidePolygonEvent());
-              },
-              child: const Text(
-                "Расположение точки относительно многоугольника",
-                textAlign: TextAlign.center,
-              )),
+            onPressed: () {
+              context.read<MainBloc>().add(IsPointInsidePolygonEvent());
+            },
+            child: const Text(
+              "Расположение точки относительно многоугольника",
+              textAlign: TextAlign.center,
+            ),
+          ),
+          AffineFields(
+            onXChanged: (val) {
+              x = val;
+            },
+            onYChanged: (val) {
+              y = val;
+            },
+            onAngleChanged: (val) {
+              angle = val;
+            },
+            onSubmit: () {
+              context.read<MainBloc>().add(AffineTransformationEvent(
+                    dx: x == "" ? null : x,
+                    dy: y == "" ? null : y,
+                    angle: angle == "" ? null : angle,
+                  ),);
+            },
+          ),
           const Spacer(),
           ElevatedButton(
               onPressed: () {
