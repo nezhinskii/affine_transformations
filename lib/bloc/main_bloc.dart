@@ -222,6 +222,15 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       }
     }
 
+    double? k;
+    if (event.k != null) {
+      k = double.tryParse(event.k!);
+      if (k == null) {
+        emit(state.copyWith(message: "Не число в k"));
+        return;
+      }
+    }
+
 
     Offset? move =
         dx != null || dy != null ? Offset(dx ?? 0.0, dy ?? 0.0) : null;
@@ -295,6 +304,23 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       }
     }
 
+    if (k != null) {
+      for (var primitive in selected) {
+        final vertices = <Offset>[];
+        for (var point in primitive.vertices) {
+          vertices.add(
+            _scalePoint(
+              point,
+              k,
+              center.position.dx,
+              center.position.dy,
+            ),
+          );
+        }
+        primitive.vertices = vertices;
+      }
+    }
+
     emit(state.copyWith());
   }
 }
@@ -310,6 +336,13 @@ Offset _rotatePoint(
 Offset _movePoint(Offset point, double dx, double dy) {
   Matrix mPoint = Matrix.point(point.dx, point.dy);
   Matrix transform = Matrix.translation(dx, dy);
+  Matrix result = mPoint * transform;
+  return Offset(result[0][0], result[0][1]);
+}
+
+Offset _scalePoint(Offset point, double k, double xCenter, double yCenter) {
+  Matrix mPoint = Matrix.point(point.dx, point.dy);
+  Matrix transform = Matrix.scaling(k, xCenter, yCenter);
   Matrix result = mPoint * transform;
   return Offset(result[0][0], result[0][1]);
 }

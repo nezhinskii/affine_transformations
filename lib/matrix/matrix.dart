@@ -22,6 +22,13 @@ class Matrix {
     [-x*cos(angle) + y*sin(angle)+x,-x*sin(angle)-y*cos(angle)+y,1],
   ]);
 
+  Matrix.scaling(double k, double x, double y)
+      : this(3, 3, [
+    [k,0,0,],
+    [0,k,0],
+    [-x*(k-1),-y*(k-1), -1],
+  ]);
+
   final List<List<double>> value;
 
   int get rows => value.length;

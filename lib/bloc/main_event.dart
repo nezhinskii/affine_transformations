@@ -38,10 +38,11 @@ class PointRelativeToLineEvent extends MainEvent {}
 class IsPointInsidePolygonEvent extends MainEvent {}
 
 class AffineTransformationEvent extends MainEvent {
-  AffineTransformationEvent({this.dx, this.dy, this.angle});
+  AffineTransformationEvent({this.dx, this.dy, this.angle, this.k});
 
   final String? dx;
   final String? dy;
   final String? angle;
+  final String? k;
 }
 

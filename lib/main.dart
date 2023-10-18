@@ -22,9 +22,7 @@ class MyApp extends StatelessWidget {
       ),
       home: Material(
         child: BlocProvider<MainBloc>(
-          create: (context) => MainBloc(),
-          child: const HomePage()
-        ),
+            create: (context) => MainBloc(), child: const HomePage()),
       ),
     );
   }
@@ -48,37 +46,38 @@ class HomePage extends StatelessWidget {
             Expanded(
               child: BlocConsumer<MainBloc, MainState>(
                 listener: (context, state) {
-                  if (state.message != null){
+                  if (state.message != null) {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        behavior: SnackBarBehavior.floating,
-                        width: 700,
-                        content: Text(
-                          state.message!,
-                          textAlign: TextAlign.center,
-                        ),
-                      )
-                    );
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      behavior: SnackBarBehavior.floating,
+                      width: 700,
+                      content: Text(
+                        state.message!,
+                        textAlign: TextAlign.center,
+                      ),
+                    ));
                   }
                 },
                 builder: (context, state) {
                   return GestureDetector(
                     onPanDown: (details) {
-                      if (state is PrimitiveAddingState){
-                        context.read<MainBloc>().add(AddPointEvent(details.localPosition));
+                      if (state is PrimitiveAddingState) {
+                        context
+                            .read<MainBloc>()
+                            .add(AddPointEvent(details.localPosition));
                       }
                     },
                     child: ClipRRect(
                       child: CustomPaint(
                         foregroundPainter: PrimitivesPainter(
-                          primitives: state.primitives,
-                          newPoints: switch(state){
-                            CommonState() => null,
-                            PrimitiveAddingState() => state.newPoints,
-                          },
-                          style: Paint()..color = Colors.black..strokeWidth = 3
-                        ),
+                            primitives: state.primitives,
+                            newPoints: switch (state) {
+                              CommonState() => null,
+                              PrimitiveAddingState() => state.newPoints,
+                            },
+                            style: Paint()
+                              ..color = Colors.black
+                              ..strokeWidth = 3),
                         child: Container(
                           color: Colors.white,
                         ),
@@ -94,4 +93,3 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-

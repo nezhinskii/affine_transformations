@@ -14,6 +14,7 @@ class ToolBar extends StatefulWidget {
 class _ToolBarState extends State<ToolBar> {
   String x = "";
   String y = "";
+  String k = "";
   String angle = "";
 
   String _calcPrimitiveTitle(List<Primitive> primitives, int index) {
@@ -51,22 +52,23 @@ class _ToolBarState extends State<ToolBar> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.background,
-          border: Border(
-            right: BorderSide(
-              color: Theme.of(context).primaryColor,
-              width: 3,
-            ),
-          )),
-      height: double.infinity,
-      width: 270,
-      child: Column(
-        children: [
-          const SizedBox(
-            height: 20,
+        color: Theme.of(context).colorScheme.background,
+        border: Border(
+          right: BorderSide(
+            color: Theme.of(context).primaryColor,
+            width: 3,
           ),
-          BlocBuilder<MainBloc, MainState>(
-            builder: (context, state) => ElevatedButton(
+        ),
+      ),
+      width: 270,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 20,
+            ),
+            BlocBuilder<MainBloc, MainState>(
+              builder: (context, state) => ElevatedButton(
                 onPressed: switch (state) {
                   CommonState() => () {
                       context
@@ -83,119 +85,128 @@ class _ToolBarState extends State<ToolBar> {
                     PrimitiveAddingState() => "Завершить добавление примитива",
                   },
                   textAlign: TextAlign.center,
-                )),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          const Text("Список примитивов"),
-          Container(
-            constraints: const BoxConstraints(
-              maxHeight: 300,
+                ),
+              ),
             ),
-            width: 240,
-            decoration: BoxDecoration(
-                border: Border.all(
-                    color: Theme.of(context).colorScheme.primary, width: 2)),
-            child: BlocBuilder<MainBloc, MainState>(
-              builder: (context, state) => switch (state.primitives.isEmpty) {
-                true => const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    child: Text(
-                      "Пусто",
-                      textAlign: TextAlign.center,
+            const SizedBox(
+              height: 20,
+            ),
+            const Text("Список примитивов"),
+            Container(
+              constraints: const BoxConstraints(
+                maxHeight: 300,
+              ),
+              width: 240,
+              decoration: BoxDecoration(
+                  border: Border.all(
+                      color: Theme.of(context).colorScheme.primary, width: 2)),
+              child: BlocBuilder<MainBloc, MainState>(
+                builder: (context, state) => switch (state.primitives.isEmpty) {
+                  true => const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                      child: Text(
+                        "Пусто",
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  ),
-                false => ListView.builder(
-                    shrinkWrap: true,
-                    itemBuilder: (context, index) {
-                      if (index == 0 || index == state.primitives.length + 1) {
-                        return const SizedBox(
-                          height: 10,
+                  false => ListView.builder(
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        if (index == 0 ||
+                            index == state.primitives.length + 1) {
+                          return const SizedBox(
+                            height: 10,
+                          );
+                        }
+                        return _PrimitiveTile(
+                          title:
+                              _calcPrimitiveTitle(state.primitives, index - 1),
+                          isSelected: state.primitives[index - 1].isSelected,
+                          onTap: () {
+                            context
+                                .read<MainBloc>()
+                                .add(PrimitiveSelectedChanged(index - 1));
+                          },
+                          onRemove: () {
+                            context
+                                .read<MainBloc>()
+                                .add(RemovePrimitive(index - 1));
+                          },
                         );
-                      }
-                      return _PrimitiveTile(
-                        title: _calcPrimitiveTitle(state.primitives, index - 1),
-                        isSelected: state.primitives[index - 1].isSelected,
-                        onTap: () {
-                          context
-                              .read<MainBloc>()
-                              .add(PrimitiveSelectedChanged(index - 1));
-                        },
-                        onRemove: () {
-                          context
-                              .read<MainBloc>()
-                              .add(RemovePrimitive(index - 1));
-                        },
-                      );
-                    },
-                    itemCount: state.primitives.length + 2,
-                  ),
-              },
+                      },
+                      itemCount: state.primitives.length + 2,
+                    ),
+                },
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          ElevatedButton(
+            const SizedBox(
+              height: 20,
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  context.read<MainBloc>().add(LinesIntersectionEvent());
+                },
+                child: const Text(
+                  "Точка пересечения ребер",
+                  textAlign: TextAlign.center,
+                )),
+            const SizedBox(
+              height: 20,
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  context.read<MainBloc>().add(PointRelativeToLineEvent());
+                },
+                child: const Text(
+                  "Расположение точки относительно отрезка",
+                  textAlign: TextAlign.center,
+                )),
+            const SizedBox(
+              height: 20,
+            ),
+            ElevatedButton(
               onPressed: () {
-                context.read<MainBloc>().add(LinesIntersectionEvent());
+                context.read<MainBloc>().add(IsPointInsidePolygonEvent());
               },
               child: const Text(
-                "Точка пересечения ребер",
+                "Расположение точки относительно многоугольника",
                 textAlign: TextAlign.center,
-              )),
-          const SizedBox(
-            height: 20,
-          ),
-          ElevatedButton(
-              onPressed: () {
-                context.read<MainBloc>().add(PointRelativeToLineEvent());
-              },
-              child: const Text(
-                "Расположение точки относительно отрезка",
-                textAlign: TextAlign.center,
-              )),
-          const SizedBox(
-            height: 20,
-          ),
-          ElevatedButton(
-            onPressed: () {
-              context.read<MainBloc>().add(IsPointInsidePolygonEvent());
-            },
-            child: const Text(
-              "Расположение точки относительно многоугольника",
-              textAlign: TextAlign.center,
+              ),
             ),
-          ),
-          AffineFields(
-            onXChanged: (val) {
-              x = val;
-            },
-            onYChanged: (val) {
-              y = val;
-            },
-            onAngleChanged: (val) {
-              angle = val;
-            },
-            onSubmit: () {
-              context.read<MainBloc>().add(AffineTransformationEvent(
-                    dx: x == "" ? null : x,
-                    dy: y == "" ? null : y,
-                    angle: angle == "" ? null : angle,
-                  ),);
-            },
-          ),
-          const Spacer(),
-          ElevatedButton(
-              onPressed: () {
-                context.read<MainBloc>().add(const ClearCanvasEvent());
+            AffineFields(
+              onXChanged: (val) {
+                x = val;
               },
-              child: const Text("Очистить")),
-          const SizedBox(
-            height: 20,
-          ),
-        ],
+              onYChanged: (val) {
+                y = val;
+              },
+              onAngleChanged: (val) {
+                angle = val;
+              },
+              onKChanged: (val) {
+                k = val;
+              },
+              onSubmit: () {
+                context.read<MainBloc>().add(
+                      AffineTransformationEvent(
+                        dx: x == "" ? null : x,
+                        dy: y == "" ? null : y,
+                        angle: angle == "" ? null : angle,
+                        k: k == "" ? null : k,
+                      ),
+                    );
+              },
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  context.read<MainBloc>().add(const ClearCanvasEvent());
+                },
+                child: const Text("Очистить")),
+            const SizedBox(
+              height: 20,
+            ),
+          ],
+        ),
       ),
     );
   }
